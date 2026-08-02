@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TMC Quick Deal Analyzer</title>
+  <meta name="description" content="Fast multifamily deal screening by TMC Capital Holdings." />
+  <style>
+    :root{
+      --navy:#0b1f3a; --navy2:#15365f; --gold:#c99a45; --cream:#f6f2ea;
+      --text:#172033; --muted:#6b7588; --line:#dce2eb; --white:#fff;
+      --green:#176b4d; --yellow:#a66a00; --red:#a33131;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:#f4f7fb;color:var(--text)}
+    .wrap{max-width:1180px;margin:auto;padding:24px 16px 44px}
+    .hero{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-radius:22px;padding:26px;margin-bottom:20px}
+    .brand{font-size:.82rem;letter-spacing:.08em;color:#d8e3f1;font-weight:700}
+    h1{font-family:Georgia,serif;font-size:clamp(2rem,4vw,3.3rem);line-height:1.05;margin:12px 0 8px}
+    .hero p{margin:0;color:#dce5f0;max-width:760px}
+    .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:20px}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}
+    h2{font-size:1.05rem;margin:0 0 16px;color:var(--navy)}
+    .section{padding:15px 0;border-top:1px solid #edf1f5}
+    .section:first-of-type{border-top:0;padding-top:0}
+    .section-title{font-weight:800;color:var(--navy);margin-bottom:11px}
+    .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    label{font-size:.84rem;font-weight:700;color:#3e485b}
+    input{width:100%;margin-top:6px;padding:12px;border:1px solid #cfd7e2;border-radius:10px;font:inherit}
+    input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,154,69,.16)}
+    .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+    .quick button{padding:9px;border:1px solid #cfd7e2;border-radius:9px;background:#fff;font-weight:800;cursor:pointer}
+    .quick button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .analyze{width:100%;border:0;border-radius:11px;background:var(--gold);color:#14223a;padding:14px;font-weight:900;letter-spacing:.04em;cursor:pointer}
+    .metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+    .metric{border:1px solid var(--line);border-radius:13px;padding:13px;background:#fbfcfe}
+    .metric span{display:block;font-size:.76rem;color:var(--muted);margin-bottom:5px}
+    .metric strong{font-size:1.18rem;color:var(--navy)}
+    .decision{margin-top:15px;border:1px solid var(--line);border-radius:15px;padding:17px;background:var(--cream)}
+    .decision-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .badge{display:inline-block;padding:8px 13px;border-radius:999px;color:#fff;font-size:.82rem;font-weight:900}
+    .buy{background:var(--green)} .negotiate{background:var(--yellow)} .pass{background:var(--red)}
+    .score{font-size:1.7rem;font-weight:900;color:var(--navy);text-align:right}
+    .reason{margin:12px 0 0;line-height:1.5;color:#465167}
+    .checks{margin-top:14px;display:grid;gap:8px}
+    .check{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgba(0,0,0,.07);font-size:.88rem}
+    .status-pass{color:var(--green);font-weight:800}.status-fail{color:var(--red);font-weight:800}
+    .note{margin-top:15px;color:var(--muted);font-size:.8rem;line-height:1.5}
+    @media(max-width:850px){.grid{grid-template-columns:1fr}}
+    @media(max-width:560px){.fields,.metrics{grid-template-columns:1fr}.quick{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <div class="brand">TMC CAPITAL HOLDINGS · 80/20 UNDERWRITING</div>
+    <h1>TMC Quick Deal Analyzer</h1>
+    <p>Enter the core deal assumptions and get a clear Buy, Negotiate, or Pass decision in minutes.</p>
+  </section>
+
+  <section class="grid">
+    <div class="panel">
+      <h2>Deal Inputs</h2>
+
+      <div class="section">
+        <div class="section-title">Property</div>
+        <div class="fields">
+          <label>Property Name
+            <input id="propertyName" type="text" placeholder="Example: Palm Haven" />
+          </label>
+          <label>Units
+            <input id="units" type="number" min="1" value="8" />
+          </label>
+          <label>Purchase Price
+            <input id="purchasePrice" type="number" min="0" step="1000" value="1025000" />
+          </label>
+          <label>Rehab Budget
+            <input id="rehab" type="number" min="0" step="1000" value="0" />
+          </label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Income & Expenses</div>
+        <div class="fields">
+          <label>Monthly Gross Rent
+            <input id="monthlyRent" type="number" min="0" step="100" value="12240" />
+          </label>
+          <label>Other Monthly Income
+            <input id="otherIncome" type="number" min="0" step="50" value="938" />
+          </label>
+          <label>Vacancy %
+            <input id="vacancy" type="number" min="0" max="100" step=".1" value="8" />
+          </label>
+          <label>Expense Ratio %
+            <input id="expenseRatio" type="number" min="0" max="100" step=".1" value="45" />
+          </label>
+        </div>
+        <div class="quick">
+          <button type="button" data-expense="40">40%</button>
+          <button type="button" data-expense="45" class="active">45%</button>
+          <button type="button" data-expense="50">50%</button>
+          <button type="button" data-expense="35">35%</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Financing</div>
+        <div class="fields">
+          <label>Down Payment %
+            <input id="downPayment" type="number" min="0" max="100" step=".1" value="30" />
+          </label>
+          <label>Interest Rate %
+            <input id="interestRate" type="number" min="0" step=".01" value="6.5" />
+          </label>
+          <label>Loan Term (Years)
+            <input id="loanTerm" type="number" min="1" value="25" />
+          </label>
+          <label>Closing Costs %
+            <input id="closingCosts" type="number" min="0" step=".1" value="3" />
+          </label>
+        </div>
+      </div>
+
+      <button class="analyze" id="analyzeBtn" type="button">ANALYZE DEAL</button>
+    </div>
+
+    <div class="panel">
+      <h2>Deal Decision</h2>
+      <div class="metrics">
+        <div class="metric"><span>Price Per Unit</span><strong id="pricePerUnit">$0</strong></div>
+        <div class="metric"><span>Effective Gross Income</span><strong id="egi">$0</strong></div>
+        <div class="metric"><span>Operating Expenses</span><strong id="operatingExpenses">$0</strong></div>
+        <div class="metric"><span>NOI</span><strong id="noi">$0</strong></div>
+        <div class="metric"><span>Cap Rate</span><strong id="capRate">0.00%</strong></div>
+        <div class="metric"><span>Monthly Debt Service</span><strong id="monthlyPayment">$0</strong></div>
+        <div class="metric"><span>DSCR</span><strong id="dscr">0.00</strong></div>
+        <div class="metric"><span>Monthly Cash Flow</span><strong id="monthlyCashFlow">$0</strong></div>
+        <div class="metric"><span>Cash Flow / Unit</span><strong id="cashFlowPerUnit">$0</strong></div>
+        <div class="metric"><span>Cash Required</span><strong id="cashRequired">$0</strong></div>
+        <div class="metric"><span>Cash-on-Cash Return</span><strong id="coc">0.00%</strong></div>
+        <div class="metric"><span>Loan-to-Value</span><strong id="ltv">0.00%</strong></div>
+      </div>
+
+      <div class="decision">
+        <div class="decision-row">
+          <div>
+            <div style="font-size:.76rem;color:#6b7588;margin-bottom:6px">TMC RECOMMENDATION</div>
+            <span id="decisionBadge" class="badge negotiate">NEGOTIATE</span>
+          </div>
+          <div>
+            <div style="font-size:.76rem;color:#6b7588;text-align:right">DEAL SCORE</div>
+            <div id="score" class="score">0/100</div>
+          </div>
+        </div>
+        <p class="reason" id="decisionText">Enter the assumptions and analyze the deal.</p>
+
+        <div class="checks">
+          <div class="check"><span>DSCR ≥ 1.30</span><span id="dscrCheck">—</span></div>
+          <div class="check"><span>Cash Flow ≥ $175 / unit / month</span><span id="cfCheck">—</span></div>
+          <div class="check"><span>LTV ≤ 70%</span><span id="ltvCheck">—</span></div>
+          <div class="check"><span>Cash-on-Cash ≥ 7%</span><span id="cocCheck">—</span></div>
+        </div>
+      </div>
+
+      <div class="note">
+        Preliminary screening only. A “Buy” means the deal meets your core TMC thresholds under the assumptions entered; it still requires full due diligence, inspection, rent verification, expense verification, and financing confirmation.
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const money = v => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number.isFinite(v)?v:0);
+  const percent = v => `${(Number.isFinite(v)?v:0).toFixed(2)}%`;
+
+  document.querySelectorAll('[data-expense]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('[data-expense]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      $('expenseRatio').value = btn.dataset.expense;
+    });
+  });
+
+  function loanPayment(principal, annualRate, years){
+    const months = years * 12;
+    const r = annualRate / 100 / 12;
+    if(principal <= 0 || months <= 0) return 0;
+    if(r === 0) return principal / months;
+    return principal * (r * Math.pow(1+r,months)) / (Math.pow(1+r,months)-1);
+  }
+
+  function mark(id, passed){
+    const el = $(id);
+    el.textContent = passed ? 'PASS' : 'FAIL';
+    el.className = passed ? 'status-pass' : 'status-fail';
+  }
+
+  function analyze(){
+    const units = Math.max(1, Number($('units').value)||1);
+    const price = Math.max(0, Number($('purchasePrice').value)||0);
+    const rehab = Math.max(0, Number($('rehab').value)||0);
+    const annualRent = Math.max(0, Number($('monthlyRent').value)||0) * 12;
+    const annualOther = Math.max(0, Number($('otherIncome').value)||0) * 12;
+    const vacancy = Math.max(0, Number($('vacancy').value)||0) / 100;
+    const expenseRatio = Math.max(0, Number($('expenseRatio').value)||0) / 100;
+    const down = Math.min(1, Math.max(0, Number($('downPayment').value)||0) / 100);
+    const rate = Math.max(0, Number($('interestRate').value)||0);
+    const term = Math.max(1, Number($('loanTerm').value)||1);
+    const closing = Math.max(0, Number($('closingCosts').value)||0) / 100;
+
+    const egi = annualRent * (1-vacancy) + annualOther;
+    const expenses = egi * expenseRatio;
+    const noi = egi - expenses;
+    const loan = price * (1-down);
+    const monthlyDebt = loanPayment(loan, rate, term);
+    const annualDebt = monthlyDebt * 12;
+    const dscr = annualDebt > 0 ? noi / annualDebt : 0;
+    const annualCashFlow = noi - annualDebt;
+    const monthlyCashFlow = annualCashFlow / 12;
+    const cashFlowPerUnit = monthlyCashFlow / units;
+    const cashRequired = price * down + price * closing + rehab;
+    const coc = cashRequired > 0 ? annualCashFlow / cashRequired * 100 : 0;
+    const capRate = price > 0 ? noi / price * 100 : 0;
+    const ltv = (1-down) * 100;
+
+    $('pricePerUnit').textContent = money(price/units);
+    $('egi').textContent = money(egi);
+    $('operatingExpenses').textContent = money(expenses);
+    $('noi').textContent = money(noi);
+    $('capRate').textContent = percent(capRate);
+    $('monthlyPayment').textContent = money(monthlyDebt);
+    $('dscr').textContent = dscr.toFixed(2);
+    $('monthlyCashFlow').textContent = money(monthlyCashFlow);
+    $('cashFlowPerUnit').textContent = money(cashFlowPerUnit);
+    $('cashRequired').textContent = money(cashRequired);
+    $('coc').textContent = percent(coc);
+    $('ltv').textContent = percent(ltv);
+
+    const dscrPass = dscr >= 1.30;
+    const cfPass = cashFlowPerUnit >= 175;
+    const ltvPass = ltv <= 70;
+    const cocPass = coc >= 7;
+
+    mark('dscrCheck', dscrPass);
+    mark('cfCheck', cfPass);
+    mark('ltvCheck', ltvPass);
+    mark('cocCheck', cocPass);
+
+    const passed = [dscrPass,cfPass,ltvPass,cocPass].filter(Boolean).length;
+    let score = passed * 20;
+    score += capRate >= 7 ? 10 : capRate >= 6 ? 5 : 0;
+    score += vacancy >= .08 ? 5 : 2;
+    score += expenseRatio >= .45 ? 5 : 2;
+    score = Math.min(100,score);
+
+    let recommendation, cls, explanation;
+    if(passed === 4){
+      recommendation = 'BUY';
+      cls = 'buy';
+      explanation = 'This deal meets all four core TMC screening standards under the assumptions entered.';
+    } else if(passed >= 2 && annualCashFlow > 0){
+      recommendation = 'NEGOTIATE';
+      cls = 'negotiate';
+      const misses = [];
+      if(!dscrPass) misses.push(`DSCR is ${dscr.toFixed(2)}`);
+      if(!cfPass) misses.push(`cash flow is ${money(cashFlowPerUnit)} per unit`);
+      if(!ltvPass) misses.push(`LTV is ${ltv.toFixed(0)}%`);
+      if(!cocPass) misses.push(`cash-on-cash is ${coc.toFixed(2)}%`);
+      explanation = `The deal is positive but misses key targets: ${misses.join(', ')}. Improve price, income, expenses, or financing terms.`;
+    } else {
+      recommendation = 'PASS';
+      cls = 'pass';
+      explanation = 'The current assumptions do not produce enough debt coverage and cash flow to justify deeper underwriting.';
+    }
+
+    $('decisionBadge').textContent = recommendation;
+    $('decisionBadge').className = `badge ${cls}`;
+    $('score').textContent = `${score}/100`;
+    $('decisionText').textContent = explanation;
+  }
+
+  $('analyzeBtn').addEventListener('click', analyze);
+  document.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter') analyze()}));
+  analyze();
+</script>
+</body>
+</html>
